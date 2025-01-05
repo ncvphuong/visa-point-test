@@ -1,0 +1,112 @@
+{
+  "name": "Australia Visa Points Criteria",
+  "version": "1.0.0",
+  "visaNominationPoints": {
+    "189": {
+      "type": "Skilled Independent (Subclass 189)",
+      "points": 0,
+      "description": "No nomination points required for independent skilled visa"
+    },
+    "190": {
+      "type": "Skilled Nominated (Subclass 190)",
+      "points": 5,
+      "description": "Requires nomination by a State or Territory government"
+    },
+    "491": {
+      "type": "Skilled Work Regional (Subclass 491)",
+      "points": 15,
+      "description": "Requires nomination by a State/Territory government or sponsorship by an eligible family member"
+    }
+  },
+  "questions": {
+    "age": {
+      "title": "Age",
+      "description": "Your age at the time of invitation to apply for the visa",
+      "options": [
+        { "min": 18, "max": 24, "points": 25 },
+        { "min": 25, "max": 32, "points": 30 },
+        { "min": 33, "max": 39, "points": 25 },
+        { "min": 40, "max": 44, "points": 15 },
+        { "min": 45, "max": 49, "points": 0 }
+      ]
+    },
+    "english": {
+      "title": "English Language Ability",
+      "description": "Your English language test results must not be more than 36 months old at the time of invitation",
+      "options": [
+        { "level": "competent", "points": 0 },
+        { "level": "proficient", "points": 10 },
+        { "level": "superior", "points": 20 }
+      ]
+    },
+    "skilledEmployment": {
+      "title": "Skilled Employment Experience",
+      "description": "Employment experience in your nominated skilled occupation or a closely related skilled occupation",
+      "overseas": {
+        "title": "Overseas Work Experience",
+        "description": "Work experience gained outside Australia",
+        "options": [
+          { "minYears": 0, "maxYears": 2, "points": 0 },
+          { "minYears": 3, "maxYears": 4, "points": 5 },
+          { "minYears": 5, "maxYears": 7, "points": 10 },
+          { "minYears": 8, "maxYears": 50, "points": 15 }
+        ]
+      },
+      "australian": {
+        "title": "Australian Work Experience",
+        "description": "Work experience gained within Australia",
+        "options": [
+          { "minYears": 0, "maxYears": 0, "points": 0 },
+          { "minYears": 1, "maxYears": 2, "points": 5 },
+          { "minYears": 3, "maxYears": 4, "points": 10 },
+          { "minYears": 5, "maxYears": 7, "points": 15 },
+          { "minYears": 8, "maxYears": 50, "points": 20 }
+        ]
+      }
+    },
+    "qualifications": {
+      "title": "Educational Qualifications",
+      "description": "Your highest completed qualification recognized by the relevant assessing authority",
+      "options": [
+        { "level": "phd", "points": 20, "description": "Doctorate from an Australian institution or other recognized institution" },
+        { "level": "bachelorOrMaster", "points": 15, "description": "Bachelor degree or Masters degree from an Australian institution or other recognized institution" },
+        { "level": "diplomaOrTrade", "points": 10, "description": "Diploma or trade qualification completed in Australia" },
+        { "level": "otherRecognized", "points": 10, "description": "Other qualification recognized by the relevant assessing authority" }
+      ]
+    },
+    "specialistEducation": {
+      "title": "Specialist Education Qualification",
+      "description": "Qualification in a STEM field, ICT, or other specialist area",
+      "points": 10
+    },
+    "australianStudyRequirement": {
+      "title": "Australian Study Requirement",
+      "description": "At least 2 academic years of study in Australia meeting the Australian Study Requirement",
+      "points": 5
+    },
+    "professionalYear": {
+      "title": "Professional Year in Australia",
+      "description": "Completion of a Professional Year program in Australia",
+      "points": 5
+    },
+    "credentialedCommunityLanguage": {
+      "title": "Credentialed Community Language",
+      "description": "NAATI certification at the Certified Provisional level or higher",
+      "points": 5
+    },
+    "studyInRegionalAustralia": {
+      "title": "Study in Regional Australia",
+      "description": "Study completed in a designated regional area of Australia",
+      "points": 5
+    },
+    "partnerSkills": {
+      "title": "Partner Skills",
+      "description": "Points that can be claimed based on your partner's skills and qualifications",
+      "options": {
+        "skilledPartner": { "points": 10, "description": "Partner meets age, English and skill requirements" },
+        "partnerWithCompetentEnglish": { "points": 5, "description": "Partner has at least competent English" },
+        "singleApplicantOrAusCitizenPR": { "points": 10, "description": "You are single or your partner is an Australian citizen/PR" }
+      }
+    }
+  }
+}

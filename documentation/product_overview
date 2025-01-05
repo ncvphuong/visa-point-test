@@ -1,0 +1,251 @@
+# Product Document: Visa Points Test Application
+A Node.js + Express Application for Managing Visa Points Tests (Starting with Australia’s 491 & 190)
+
+## 1. Introduction
+The Visa Points Test Application is a Node.js Express application designed to calculate eligibility points for various visa programs. Its initial focus is on the Australian General Skilled Migration (GSM) program, specifically the Skilled Nominated (Subclass 190) and Skilled Work Regional (Subclass 491) visas. Future expansions will include other countries and visa categories.
+
+This product document outlines the goals, requirements, architecture, and roadmap for the application.
+
+## 2. Goals & Objectives
+Accurate Points Calculation: Implement the latest Australian visa points test system for Subclass 190 and 491 according to official guidelines.
+Scalable Design: Prepare the application’s structure to accommodate additional countries and visa subclasses in the future.
+User-Friendly API: Provide a clear, documented, RESTful API that external services or front-end applications can easily integrate with.
+Maintainability: Ensure the codebase is modular, testable, and easy to update as immigration regulations change.
+Extensible Data Model: Build a flexible data model to store and manage points test rules.
+
+## 3. Key Features
+Australian Points Test for Subclass 491 & 190
+
+Criteria and points based on the latest guidelines (e.g., age, English language skills, skilled employment, education, partner points, etc.).
+Automatic differentiation between 491 and 190 (e.g., awarding 15 points for 491 nomination vs. 5 points for 190 nomination).
+Dynamic Configuration
+
+A rules engine or configurable data structure that allows new visa categories or new countries to be added without extensive code changes.
+RESTful Endpoints
+
+Expose endpoints for computing points and retrieving visa requirements.
+Example: POST /api/v1/australia/points-calc (subclass is specified in request body or query).
+Validation & Error Handling
+
+Comprehensive validation of user inputs (e.g., checking valid age range, valid English test scores, etc.).
+Clear error messages for incomplete or invalid requests.
+Versioning & Updates
+
+Use semantic versioning for the API to handle changes in immigration policy or updated points test criteria.
+Future Expansion
+
+Support multiple countries (e.g., Canada, UK, New Zealand).
+Manage different visa categories within each country with minimal refactoring.
+
+## 4. System Requirements
+
+### 4.1. Functional Requirements
+FR1: The system must calculate points for Australia 491 and 190 accurately using the latest criteria:
+Age
+English Language Proficiency
+Skilled Employment (Overseas & Australian)
+Educational Qualifications
+Australian Study Requirement
+Professional Year in Australia
+Credentials in Community Language
+Study in Regional Australia
+Partner Skills
+Nomination (15 points for 491, 5 points for 190)
+FR2: The system should expose an API endpoint where a user can submit their details and receive a total points calculation.
+FR3: The system must return a breakdown of each criteria’s points contribution for better transparency.
+
+### 4.2. Non-Functional Requirements
+NFR1: The system must be built in Node.js with Express as the framework.
+NFR2: Responses must be in JSON format.
+NFR3: The system must be highly extensible to accommodate new visa categories or new countries.
+NFR4: The system should be secure, handling user data responsibly (though minimal PII is expected).
+NFR5: The system must handle at least 100 requests per second with minimal latency (performance baseline).
+
+## 5. Architectural Overview
+
+```
+┌──────────────────┐
+│   Client/FrontEnd│
+│   (e.g., React)  │
+└──────────────────┘
+          |
+          |  HTTP / REST
+          ▼
+┌───────────────────────┐
+│   Express Application │
+│    (Node.js)          │
+├───────────────────────┤
+│   Controllers/Routes  │
+├───────────────────────┤
+│     Services/Logic    │  <---- Business Logic & Points Calculation
+├───────────────────────┤
+│      Data Layer       │  <---- (Optional) Database or JSON-based config
+└───────────────────────┘
+```
+
+- Client/FrontEnd: Could be any front-end application or third-party system that consumes the REST endpoints.
+- Express Application: Houses the main server, controllers, routes, and services for data processing.
+- Services/Logic: The core points calculation logic, referencing a config or rules engine for different visa subclasses.
+- Data Layer: (Optional) A database (e.g., MongoDB, PostgreSQL) or JSON-based configuration storing the points test details.
+
+## 6. Data Model
+For the first release (Australia 491 & 190), the data model can be stored in a JSON or a small database table:
+
+VisaCriteria
+
+visaType: string (e.g., "Subclass 190", "Subclass 491")
+ageRanges: Array of objects for age range and points
+json
+Copy code
+[
+  { "min": 18, "max": 24, "points": 25 },
+  { "min": 25, "max": 32, "points": 30 },
+  ...
+]
+englishSkill: Array of objects for each band (Competent, Proficient, Superior) with associated points.
+skilledEmployment:
+overseas: breakdown by years of experience
+australian: breakdown by years of experience
+educationalQualifications: points for different qualification levels.
+additionalFactors: such as partner skills, community language, regional study, etc.
+nominationPoints: e.g., 5 (for 190), 15 (for 491).
+
+##  7. API Endpoints
+Below is a suggested API structure for the first version:
+
+POST /api/v1/australia/points-calc
+
+Description: Calculates the total points for either Subclass 190 or 491.
+Request Body (example):
+json
+Copy code
+{
+  "visaType": "491",
+  "age": 30,
+  "english": "superior",
+  "overseasExperience": 3,
+  "australianExperience": 1,
+  "educationLevel": "bachelor",
+  "australianStudyRequirement": true,
+  "professionalYear": true,
+  "communityLanguage": true,
+  "regionalStudy": false,
+  "partnerSkills": {
+    "skilledPartner": true,
+    "englishProficientPartner": false
+  }
+}
+Response (example):
+json
+Copy code
+{
+  "visaType": "491",
+  "agePoints": 30,
+  "englishPoints": 20,
+  "employmentPoints": 5,
+  "educationPoints": 15,
+  "additionalPoints": 5,
+  "nominationPoints": 15,
+  "totalPoints": 90
+}
+GET /api/v1/australia/criteria
+
+Description: Returns the criteria details for 190 or 491.
+Query Parameters:
+visaType: e.g. 190 or 491.
+Response (example):
+json
+Copy code
+{
+  "visaType": "190",
+  "ageRanges": [
+    { "min": 18, "max": 24, "points": 25 },
+    ...
+  ],
+  "englishSkill": [
+    { "level": "competent", "points": 0 },
+    ...
+  ],
+  ...
+  "nominationPoints": 5
+}
+8. Implementation Details
+Folder Structure (Example):
+
+
+visa-points-app
+├── controllers
+│   └── australia.controller.js
+├── services
+│   └── australiaPoints.service.js
+├── models
+│   └── visaCriteria.js  (or JSON files for storing point tables)
+├── routes
+│   └── australia.routes.js
+├── app.js
+├── package.json
+└── README.md
+australia.controller.js
+
+Handles incoming requests to /api/v1/australia/points-calc.
+Validates request body.
+Invokes australiaPoints.service.calculatePoints(data).
+australiaPoints.service.js
+
+Houses the main logic for calculating points.
+Pulls relevant data from visaCriteria.js or a database.
+Returns the breakdown and total points.
+visaCriteria.js
+
+Exports static or fetched data about the criteria for Subclass 190 and 491.
+Could be replaced by a database in future expansions.
+app.js
+
+Initializes Express app, sets up middleware, mounts routes.
+
+## 9. Testing & Validation
+
+Unit Tests
+
+Validate calculatePoints() logic with various input combinations.
+Ensure correct points for boundary ages (e.g., 24, 25, 32, 33, etc.).
+Validate correct addition of nomination points (5 vs. 15).
+Integration Tests
+
+Test end-to-end scenarios hitting /points-calc with realistic user data.
+Ensure response structure matches the specification.
+User Acceptance Testing (UAT)
+
+Provide a test UI or a Postman collection for stakeholders to confirm calculations match official guidelines.
+
+## 10. Deployment
+
+### Environment Setup
+Node.js (v14+ or v16+ recommended).
+NPM or Yarn for package management.
+
+### Deployment Targets
+Heroku, AWS, Azure, or any Node-compatible hosting.
+
+### CI/CD
+Set up a CI/CD pipeline to automate testing and deployment on each push to main branch.
+
+### Scalability
+The stateless nature of the points calculation allows horizontal scaling easily (multiple instances behind a load balancer).
+
+## 11. Roadmap & Future Expansions
+
+### Additional Australian Visas
+Subclass 189 (Skilled Independent)
+Others as needed.
+
+### Other Countries
+Canada’s Express Entry (CRS)
+UK’s Skilled Worker
+New Zealand Skilled Migrant Category
+Dynamic Rules Engine
+Introduce a more comprehensive rules engine so that administrators can update points test without touching code.
+Localization/Internationalization
+Provide multi-language support for user inputs and error messages.
+Front-end Integration
+Provide a React/Angular front-end for direct user interaction.

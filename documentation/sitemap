@@ -1,0 +1,38 @@
+/
+├─ Home (Landing Page)
+│   ├─ Introduction (Brief overview of your services/site)
+│   └─ Menu (Links to Australia, Canada, France, New Zealand visa pages)
+│
+├─ Australia Visa Page
+│   └─ (Content about Australian visas, e.g., Subclass 491, 190, etc.)
+│
+├─ Canada Visa Page
+│   └─ (Content about Canadian visa programs)
+│
+├─ France Visa Page
+│   └─ (Content about French visa programs)
+│
+└─ New Zealand Page
+    └─ (Content about New Zealand visa programs)
+Sitemap Explanation
+Home (Landing Page)
+
+Acts as the main entry point for users.
+Contains a brief introduction describing what the website does (e.g., visa eligibility checks, immigration consulting, etc.).
+Features a menu or navigation links that direct users to the other visa pages.
+Australia Visa Page
+
+Dedicated page for Australian visa information, such as Subclass 491 and Subclass 190.
+Could include eligibility criteria, points test details, and application steps.
+Canada Visa Page
+
+Focused on Canadian visa programs (e.g., Express Entry, Provincial Nominee Program).
+Could detail the requirements, process, and points-based system (if applicable).
+France Visa Page
+
+Information about various French visa types (student, work permit, long-stay, etc.).
+Guidance on documentation, timelines, and application procedures.
+New Zealand Page
+
+Covers New Zealand’s visa categories (Skilled Migrant Category, Essential Skills, etc.).
+Steps and requirements for residency or work visas.
