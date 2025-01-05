@@ -7,7 +7,7 @@ This document outlines the database structure for the Visa Points Calculator app
 
 ### 1. users
 Primary table for user management.
-sql
+```sql
 CREATE TABLE users (
 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 email VARCHAR(255) UNIQUE NOT NULL,
@@ -18,11 +18,13 @@ last_login TIMESTAMP WITH TIME ZONE,
 avatar_url VARCHAR(255),
 preferred_language VARCHAR(10) DEFAULT 'en',
 is_email_verified BOOLEAN DEFAULT FALSE
-)
+);
+```
 
-### 2. visa_results
+## 2. visa_results
 Stores individual visa point calculation results.
-sql
+
+```sql
 CREATE TABLE visa_results (
 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 user_id UUID REFERENCES users(id) ON DELETE CASCADE,
@@ -155,3 +157,12 @@ This structure allows for:
 5. Efficient querying through appropriate indexes
 
 The structure aligns with your current frontend implementation (referencing AustraliaPointsCalculator.tsx, lines 162-390) and can be easily extended for future features.
+
+
+## database Conection  
+Direct connection
+DATABASE_URL=postgresql://postgres:9UYnFE9tckgF4UBU@db.wwgyighrkkpqagebvrnt.supabase.co:5432/postgres
+Passwword: 9UYnFE9tckgF4UBU
+
+Transaction pooler
+DATABASE_URL=postgresql://postgres.wwgyighrkkpqagebvrnt:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres

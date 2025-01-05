@@ -18,10 +18,16 @@ import {
   Drawer,
   IconButton,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import SaveIcon from '@mui/icons-material/Save';
 import { Fab } from '@mui/material';
+import { AuthModal } from '../components/AuthModal';
+import { supabase } from '../lib/supabase';
 
 interface Question {
   id: string;
@@ -163,6 +169,9 @@ const AustraliaPointsCalculator = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showValidationModal, setShowValidationModal] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -178,6 +187,22 @@ const AustraliaPointsCalculator = () => {
     }, 0);
     setTotalPoints(points);
   }, [answers]);
+
+  useEffect(() => {
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -249,9 +274,80 @@ const AustraliaPointsCalculator = () => {
     </Box>
   );
 
-  const handleSaveResult = () => {
-    // TODO: Implement save functionality
-    console.log('Saving result:', { answers, totalPoints });
+  const checkAllQuestionsAnswered = () => {
+    return questions.every(question => answers[question.id] !== undefined);
+  };
+
+  const handleSaveResult = async () => {
+    if (!checkAllQuestionsAnswered()) {
+      setShowValidationModal(true);
+      return;
+    }
+
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+
+    try {
+      // Get points breakdown
+      const pointsBreakdown = questions.map(question => {
+        const selectedOption = question.options.find(opt => opt.value === answers[question.id]);
+        return {
+          category: question.id,
+          selected_value: answers[question.id],
+          points: selectedOption?.points || 0,
+          title: question.title,
+          selected_option: selectedOption?.label,
+        };
+      });
+
+      // Format current date as DD/MM/YYYY
+      const currentDate = new Date().toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+
+      const { error } = await supabase
+        .from('visa_results')
+        .insert([
+          {
+            user_id: user.id,
+            visa_type: '',
+            scenario_name: `Scenario ${currentDate}`,
+            total_points: totalPoints,
+            answers: Object.fromEntries(
+              questions.map(q => [
+                q.id,
+                {
+                  value: answers[q.id],
+                  points: q.options.find(opt => opt.value === answers[q.id])?.points || 0,
+                  label: q.options.find(opt => opt.value === answers[q.id])?.label || '',
+                }
+              ])
+            ),
+            points_breakdown: pointsBreakdown,
+          },
+        ]);
+
+      if (error) {
+        console.error('Error saving result:', error);
+        throw error;
+      }
+
+      alert('Result saved successfully!');
+    } catch (error: any) {
+      console.error('Error saving result:', error);
+      alert('Error saving result. Please try again.');
+    }
+  };
+
+  const handleAuthSuccess = async (userId: string) => {
+    setShowAuthModal(false);
+    setUser({ id: userId });
+    // Wait a brief moment for the auth state to update
+    setTimeout(handleSaveResult, 500);
   };
 
   return (
@@ -383,8 +479,57 @@ const AustraliaPointsCalculator = () => {
         onClick={handleSaveResult}
       >
         <SaveIcon sx={{ mr: 1 }} />
-        Save Result
+        {user ? 'Save Result' : 'Sign in to Save'}
       </Fab>
+
+      {/* Validation Modal */}
+      <Dialog
+        open={showValidationModal}
+        onClose={() => setShowValidationModal(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          elevation: 3,
+          sx: { px: 2 }
+        }}
+      >
+        <DialogTitle sx={{ pt: 3 }}>
+          Incomplete Questions
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" paragraph>
+            You need to answer all questions before saving your result. Please complete the following questions:
+          </Typography>
+          <List>
+            {questions.map(question => !answers[question.id] && (
+              <ListItem key={question.id}>
+                <ListItemText 
+                  primary={question.title}
+                  primaryTypographyProps={{
+                    color: 'error.main',
+                  }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setShowValidationModal(false)}
+            variant="contained"
+          >
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Auth Modal */}
+      <AuthModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+        resultData={{ answers, totalPoints }}
+      />
     </Container>
   );
 };

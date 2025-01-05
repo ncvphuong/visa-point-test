@@ -76,7 +76,7 @@ const theme = createTheme({
 function App() {
   // For now, we'll just show the points calculator
   // In a real app, you'd use React Router for proper routing
-  const showPointsCalculator = window.location.pathname.includes('australia-points');
+  const showPointsCalculator = window.location.pathname.includes('australia-visa-point-calculator');
 
   return (
     <ThemeProvider theme={theme}>

@@ -57,7 +57,7 @@ const HeroBanner = () => {
               variant="contained" 
               color="primary" 
               size="large"
-              onClick={() => handleNavigation('/australia-points')}
+              onClick={() => handleNavigation('/australia-visa-point-calculator')}
               sx={{ 
                 minWidth: { xs: '100%', sm: 'auto' },
                 mb: { xs: 2, sm: 0 }
@@ -99,6 +99,20 @@ const HeroBanner = () => {
               }}
             >
               Discover New Zealand Visas
+            </Button>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => window.location.href = '/australia-visa-point-calculator'}
+              sx={{
+                px: 4,
+                py: 1.5,
+                fontSize: '1.1rem',
+                fontWeight: 500,
+                textTransform: 'none',
+              }}
+            >
+              Calculate Points Now
             </Button>
           </Box>
         </Box>

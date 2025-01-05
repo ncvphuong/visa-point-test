@@ -10,12 +10,17 @@ import {
   List,
   ListItem,
   ListItemText,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import { SharedAuthModal } from './SharedAuthModal';
+import { supabase } from '../lib/supabase';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const menuItems = [
   { label: 'Home', path: '/' },
-  { label: 'Australia', path: '/australia-points' },
+  { label: 'Australia', path: '/australia-visa-point-calculator' },
   { label: 'Canada', path: '/canada-points' },
   { label: 'France', path: '/france-points' },
   { label: 'New Zealand', path: '/new-zealand-points' },
@@ -24,10 +29,24 @@ const menuItems = [
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [currentPath, setCurrentPath] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   useEffect(() => {
-    setCurrentPath(window.location.pathname);
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleDrawerToggle = () => {
@@ -38,10 +57,22 @@ const Navbar = () => {
     window.location.href = path;
   };
 
-  const isActive = (path: string) => {
-    if (path === '/' && currentPath === '/') return true;
-    if (path !== '/' && currentPath.includes(path)) return true;
-    return false;
+  const handleAuthSuccess = (userData: { id: string; email: string; user_metadata: any }) => {
+    setUser(userData);
+  };
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    handleMenuClose();
   };
 
   const drawer = (
@@ -51,22 +82,8 @@ const Navbar = () => {
           button 
           key={item.label}
           onClick={() => handleNavigation(item.path)}
-          selected={isActive(item.path)}
-          sx={{
-            '&.Mui-selected': {
-              bgcolor: 'rgba(25, 118, 210, 0.08)',
-              '&:hover': {
-                bgcolor: 'rgba(25, 118, 210, 0.12)',
-              },
-            },
-          }}
         >
-          <ListItemText 
-            primary={item.label}
-            primaryTypographyProps={{
-              fontWeight: isActive(item.path) ? 600 : 400,
-            }}
-          />
+          <ListItemText primary={item.label} />
         </ListItem>
       ))}
     </List>
@@ -97,25 +114,49 @@ const Navbar = () => {
             <Button
               key={item.label}
               onClick={() => handleNavigation(item.path)}
-              sx={{ 
-                color: isActive(item.path) ? 'primary.main' : 'text.primary',
-                fontWeight: isActive(item.path) ? 600 : 400,
-                position: 'relative',
-                '&::after': isActive(item.path) ? {
-                  content: '""',
-                  position: 'absolute',
-                  bottom: 0,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  width: '100%',
-                  height: '2px',
-                  bgcolor: 'primary.main',
-                } : {},
-              }}
+              sx={{ color: 'text.primary' }}
             >
               {item.label}
             </Button>
           ))}
+        </Box>
+
+        {/* Auth Button */}
+        <Box sx={{ ml: 2 }}>
+          {user ? (
+            <>
+              <Button
+                onClick={handleMenuClick}
+                startIcon={<AccountCircleIcon />}
+                sx={{ textTransform: 'none' }}
+              >
+                Welcome, {user.user_metadata.full_name || 'User'}
+              </Button>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem onClick={handleLogout}>Sign Out</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Button
+              variant="outlined"
+              onClick={() => setShowAuthModal(true)}
+              sx={{ textTransform: 'none' }}
+            >
+              Sign In
+            </Button>
+          )}
         </Box>
 
         {/* Mobile menu icon */}
@@ -124,7 +165,7 @@ const Navbar = () => {
           aria-label="open drawer"
           edge="start"
           onClick={handleDrawerToggle}
-          sx={{ display: { md: 'none' }, color: 'text.primary' }}
+          sx={{ display: { md: 'none' }, color: 'text.primary', ml: 1 }}
         >
           <MenuIcon />
         </IconButton>
@@ -146,6 +187,13 @@ const Navbar = () => {
       >
         {drawer}
       </Drawer>
+
+      {/* Auth Modal */}
+      <SharedAuthModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+      />
     </AppBar>
   );
 };
